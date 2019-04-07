@@ -109,3 +109,5 @@ conf.ini
 
 # chrome
 chrome/
+
+auth_code/
