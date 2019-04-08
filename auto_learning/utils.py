@@ -1,12 +1,14 @@
 import PIL
 import pytesseract
 import logging
+from auto_learning import parser
+
+
+pytesseract.pytesseract.tesseract_cmd = parser.ConfigParser().get_setting("DangerZone","tesseract_cmd_path")
 
 def ocr(image_path):
 
     logging.info('Daddy, I find the image path is:{}'.format(image_path))
-
-    pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
     image = PIL.Image.open(image_path)
 
