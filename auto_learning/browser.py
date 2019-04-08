@@ -1,5 +1,7 @@
 
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common import exceptions
@@ -46,7 +48,7 @@ class Browser:
 
 
 
-    def signIn(self):
+    def signin(self):
         self.__driver.get(self.__login_url)
         self.__login_cookies = self.__driver.get_cookies()
 
@@ -55,32 +57,108 @@ class Browser:
         # Automatically fill the input control
         # and try to login
         self.__get_controls()
-        self.__fill_controls()
-        self.__try_to_login()
+        is_successful = False
 
         # Try until successful
-        while not self.__is_successful():
+        while not is_successful:
             self.__fill_controls()
             self.__try_to_login()
+            is_successful = self.__is_successful()
 
 
 
-    def find_video_urls(self):
+    def study(self):
+        
+        real_unfinished_courses = self.__get_unfinished_courses()
 
-        video_table = self.__driver.find_element_by_class_name('table-striped')
+        for real_unfinished_course in real_unfinished_courses:
+            unfinished_courses = self.__get_unfinished_courses()
+            unfinished_course = self.__get__real_unfinished_course(real_unfinished_course, unfinished_courses)
+            self.__choose_course(unfinished_course)
+            
+            real_unfinished_lessons = self.__get_unfinished_lessons()
+            for real_unfinished_lesson in real_unfinished_lessons:
+                unfinished_lessons = self.__get_unfinished_lessons()
+                unfinished_lesson = self.__get__real_unfinished_lesson(real_unfinished_lesson, unfinished_lessons)
+                self.__choose_lesson(unfinished_lesson)
+                self.__super_player()
+                self.__driver.execute_script("window.history.go(-1)")
+                time.sleep(3)
+
+            self.__driver.execute_script("window.history.go(-1)")
+            time.sleep(3)
+
+    def __get__real_unfinished_lesson(self, real_unfinished_lesson, unfinished_lessons):
+        for unfinished_lesson in unfinished_lessons:
+            # Compare the lesson name
+            if real_unfinished_lesson[0] == unfinished_lesson[0]:
+                return unfinished_lesson
+
+    def __get__real_unfinished_course(self, real_unfinished_course, unfinished_courses):
+        for unfinished_course in unfinished_courses:
+            # Compare the course name
+            if real_unfinished_course[0] == unfinished_course[0]:
+                return unfinished_course
+
+    def __get_unfinished_courses(self):
+        courses = self.__find_interesting_table()
+        return [course for course in courses if course[-2] == '未完成' ]
+
+
+    def __get_unfinished_lessons(self):
+        lessons = self.__find_interesting_table()
+        return [lesson for lesson in lessons if lesson[-2] == '未完成']
+
+    def __choose_course(self, unfinished_course):
+        unfinished_course[-1].click()
+        logging.info('OK, I clicked the course:{}'.format(unfinished_course[0]))
+        logging.info(unfinished_course)
+
+
+    def __choose_lesson(self, unfinished_lesson):
+        unfinished_lesson[-1].click()
+        logging.info('OK, I clicked the lesson:{}'.format(unfinished_lesson[0]))
+        logging.info(unfinished_lesson)
+
+    def __super_player(self):
+        logging.info('Wow, play the viedo incrediblely')
+
+        action = ActionChains(self.__driver)
+        
+        # Get video duration
+        video_duration_element = self.__driver.find_element_by_class_name("vjs-duration-display")
+        action.move_to_element(video_duration_element).perform()
+        minutes, seconds = video_duration_element.text.replace('Duration Time','').split(':')
+        learning_time = int(minutes) * 60 + int(seconds) + 10
+        logging.info("video_element duration {}".format(learning_time))
+
+        # Click to activate the window
+        
+        while learning_time > 0:
+            action.move_by_offset(0, 0).click().perform()
+            time.sleep(1)
+            learning_time = learning_time - 1
+            logging.info("learning_duration remaining:{}".format(learning_time))
+
+
+    
+
+    def __find_interesting_table(self):
+        interesting_table = self.__driver.find_element_by_class_name('table-striped')
         
         # The first row is header, so use [1:-1] to skip
-        video_rows = video_table.find_elements_by_tag_name('tr')[1:-1]
-        logging.info("Wow, Daddy, I find the viedo info:")
+        interesting_rows = interesting_table.find_elements_by_tag_name('tr')[1:-1]
 
-        # logging.info(video_rows)
-        video_rows_info = [] 
-        for video_row in video_rows:
-            video_row_info = [video_column.text for video_column in video_row.find_elements_by_tag_name('td')]
-            video_rows_info.append(video_row_info)
-       
-        logging.info(video_rows_info)
+        interestings = [] 
+        for interesting_row in interesting_rows:
+            interesting_columns = interesting_row.find_elements_by_tag_name('td')
+            interesting = [interesting_column.text for interesting_column in interesting_columns]
 
+            # Append hyperlink element
+            interesting.append(interesting_columns[0].find_element_by_tag_name('a'))
+            interestings.append(interesting)
+
+        return interestings
 
     def __wait_for_element_to_finish(self, elementId, timeout):
         element = self.__driver.find_element_by_id(elementId)
@@ -88,7 +166,7 @@ class Browser:
         try:
             WebDriverWait(self.__driver, timeout).until(EC.staleness_of(element))
         except exceptions.TimeoutException:
-            logging.warn('Daddy, time flys. ')
+            logging.warn('Daddy, time flys.')
 
     def __get_controls(self):
         self.__uInput = self.__driver.find_element_by_name('Uname')

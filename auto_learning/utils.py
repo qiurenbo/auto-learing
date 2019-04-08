@@ -4,7 +4,7 @@ import logging
 
 def ocr(image_path):
 
-    logging.info('Daddy, I find image_path is:{}'.format(image_path))
+    logging.info('Daddy, I find the image path is:{}'.format(image_path))
 
     pytesseract.pytesseract.tesseract_cmd = 'C:/Program Files/Tesseract-OCR/tesseract.exe'
 
