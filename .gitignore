@@ -111,3 +111,5 @@ conf.ini
 chrome/
 
 auth_code/
+
+log/

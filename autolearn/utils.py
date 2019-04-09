@@ -1,10 +1,11 @@
 import PIL
 import pytesseract
 import logging
-from auto_learning import parser
+from autolearn import config_parser
+import time
+import os
 
-
-pytesseract.pytesseract.tesseract_cmd = parser.ConfigParser().get_setting("DangerZone","tesseract_cmd_path")
+pytesseract.pytesseract.tesseract_cmd = config_parser.ConfigParser().get_setting("DangerZone","tesseract_cmd_path")
 
 def ocr(image_path):
 
@@ -20,3 +21,10 @@ def ocr(image_path):
         logging.info('Daddy, I know these words:{}'.format(text))
 
     return text
+
+def get_nowtime():
+    return time.strftime('%Y%m%d%H%M%S', time.localtime())
+
+def mkdir_if_not_exists(dir_name):
+    if not os.path.exists(dir_name):
+        os.mkdir(dir_name)

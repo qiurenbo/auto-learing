@@ -10,8 +10,7 @@ import os
 import logging
 import time
 
-from auto_learning import parser
-from auto_learning import utils
+from autolearn import config_parser, utils
 
 import requests
 from requests.cookies import RequestsCookieJar
@@ -24,7 +23,7 @@ class Browser:
 
         self.__driver = webdriver
         self.__options = Options()
-        self.__config = parser.ConfigParser()
+        self.__config = config_parser.ConfigParser()
 
         self.__login_url = self.__config.get_setting("DangerZone","login_url")
         self.__login_auth_code_url = self.__config.get_setting("DangerZone","login_auth_code_url")
@@ -36,7 +35,7 @@ class Browser:
         # Set chrome driver options
         self.__options.add_argument('--log-level=WARNING')
         self.__options.add_argument('--mute-audio')
-        self.__options.add_argument('--headless')
+        # self.__options.add_argument('--headless')
 
         if os.path.exists("./chrome/chrome.exe"):
             self.__options.binary_location = "./chrome/chrome.exe"
@@ -69,7 +68,6 @@ class Browser:
             is_successful = self.__is_successful()
 
 
-
     def study(self):
         # If refresh the browser, we must re-get the dom elements,
         # So we use the real_unfinished_courses / real_unfinished_learns to cache the real unfinished course/lesson name
@@ -83,6 +81,7 @@ class Browser:
             
             # Cache the unfinished lessons
             real_unfinished_lessons = self.__get_unfinished_lessons()
+            logging.info(real_unfinished_lessons)
             for real_unfinished_lesson in real_unfinished_lessons:
                 unfinished_lessons = self.__get_unfinished_lessons()
                 unfinished_lesson = self.__get__real_unfinished_lesson(real_unfinished_lesson, unfinished_lessons)
@@ -134,9 +133,10 @@ class Browser:
         # Get video duration
         video_duration_element = self.__driver.find_element_by_class_name("vjs-duration-display")
         action.move_to_element(video_duration_element).perform()
+        time.sleep(2)
         minutes, seconds = video_duration_element.text.replace('Duration Time','').split(':')
         learning_time = int(minutes) * 60 + int(seconds) + 10
-        # logging.info("video_element duration {}".format(learning_time))
+        logging.info("video duration {} seconds".format(learning_time))
 
         already_learning_time = 0
         while learning_time > 0:
@@ -145,16 +145,15 @@ class Browser:
             learning_time = learning_time - 1
             already_learning_time = already_learning_time + 1
             time.sleep(1)
-            logging.info("Daddy, I have already learned {} seconds, {} seconds remaining".format(already_learning_time, learning_time))
-
-
+            if already_learning_time % 60 == 0:
+                logging.info("I have already learned {} minutes, {} minutes remaining".format(already_learning_time / 60, learning_time / 60))
 
 
     def __find_interesting_table(self):
         interesting_table = self.__driver.find_element_by_class_name('table-striped')
         
-        # The first row is header, so use [1:-1] to skip
-        interesting_rows = interesting_table.find_elements_by_tag_name('tr')[1:-1]
+        # The first row is header, so use [1:] to skip it
+        interesting_rows = interesting_table.find_elements_by_tag_name('tr')[1:]
 
         interestings = [] 
         for interesting_row in interesting_rows:
@@ -164,7 +163,7 @@ class Browser:
             # Append hyperlink element
             interesting.append(interesting_columns[0].find_element_by_tag_name('a'))
             interestings.append(interesting)
-
+        logging.info(interestings)
         return interestings
 
     def __wait_for_element_to_finish(self, elementId, timeout):
@@ -200,10 +199,8 @@ class Browser:
         self.__vInput.send_keys(auth_code)
 
     def __get_absolute_path(self):
-        if not os.path.exists(self.__auth_code_dir):
-            os.mkdir(self.__auth_code_dir)
-
-        prefix = time.strftime('%Y%m%d%H%M%S', time.localtime())
+        utils.mkdir_if_not_exists(self.__auth_code_dir)
+        prefix = utils.get_nowtime()
         return self.__auth_code_dir + '/' + prefix + '_auth_code.png'
 
     # Use the sessionid in cookie to get the auth code
