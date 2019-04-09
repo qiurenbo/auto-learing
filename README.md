@@ -3,25 +3,22 @@ This program is used for auto-learning the video courses in http://zy.jxkp.net. 
 
 # 1.For Developers 
 ## 1.1.Install tesseract
-Download the tesseract for windows x64.
-
-https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v4.1.0.20190314.exe
+Download the [tesseract for windows x64](https://digi.bib.uni-mannheim.de/tesseract/tesseract-ocr-w64-setup-v4.1.0.20190314.exe). 
 
 ## 1.2.Download Chrome and relevant driver
-Download driver 73:
-https://chromedriver.storage.googleapis.com/73.0.3683.68/chromedriver_win32.zip
+1. Download [Chrome 73 driver](https://chromedriver.storage.googleapis.com/73.0.3683.68/chromedriver_win32.zip)
 
-Install Chrome73:
-https://www.chrome.com/download/thank-you.html?statcb=1&installdataindex=defaultbrowser
+2. Install [Chrome 73](https://www.chrome.com/download/thank-you.html?statcb=1&installdataindex=defaultbrowser)
 
-Make chrome directory in the project directory like D:\Projects\auto-learning\chrome
 
-Copy the all the files under Chrome Application path like C:\Program Files (x86)\Google\Chrome\Application to the chrome directory. 
+3. New directory named chrome in the project directory. For example:"D:\Projects\auto-learning\chrome"
 
-Copy the driver to chrome directory.
+4. Copy the all the files under Chrome Application path. For example:C:\Program Files (x86)\Google\Chrome\Application to the "chrome" directory. 
+
+5. Copy the driver to "chrome" directory.
 
 ## 1.3.Setup conf.ini
-Copy the sample.ini to conf.ini and modify the 'Privacy' section.
+Copy the sample.ini to conf.ini and modify the "Privacy" section.
 
 ## 1.4.Run the code in virtualenv
 ```
