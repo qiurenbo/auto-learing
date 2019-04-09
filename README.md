@@ -21,7 +21,7 @@ Copy the all the files under Chrome Application path like C:\Program Files (x86)
 Copy the driver to chrome directory.
 
 ## 1.3.Setup conf.ini
-Copy the sample.ini and modify the 'Privacy' section.
+Copy the sample.ini to conf.ini and modify the 'Privacy' section.
 
 ## 1.4.Run the code in virtualenv
 ```
