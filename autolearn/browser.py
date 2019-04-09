@@ -35,7 +35,9 @@ class Browser:
         # Set chrome driver options
         self.__options.add_argument('--log-level=WARNING')
         self.__options.add_argument('--mute-audio')
-        # self.__options.add_argument('--headless')
+
+        if self.__config.get_setting("DangerZone","headless") == 'True':
+            self.__options.add_argument('--headless')
 
         if os.path.exists("./chrome/chrome.exe"):
             self.__options.binary_location = "./chrome/chrome.exe"

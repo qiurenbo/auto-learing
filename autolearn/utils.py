@@ -25,6 +25,8 @@ def ocr(image_path):
 def get_nowtime():
     return time.strftime('%Y%m%d%H%M%S', time.localtime())
 
+
+
 def mkdir_if_not_exists(dir_name):
     if not os.path.exists(dir_name):
         os.mkdir(dir_name)
