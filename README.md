@@ -1,7 +1,7 @@
 # auto-learing
 This program is used for auto-learning the video courses in http://zy.jxkp.net. It is only for technology learning.
 
-# 1.How to use this code 
+# 1.For Developers 
 ## 1.1.Install tesseract
 Download the tesseract for windows x64.
 
@@ -33,5 +33,15 @@ pip install -r requirements.txt
 ```
 python auto_learning.py
 ```
+# 2.For users
+## 2.1.Download the binary files.
+Go to  https://github.com/qiurenbo/auto-learing/releases , Find the latest version download.
+## 2.2.Config the conf.ini
+replace your username and password
 
-## Enjoy yourelf.
+## 2.3.Install tesseract
+Install tesseract in the package.
+
+## 2.4.Run the code
+Dobule click the auto-learning.exe.
+Enjoy yourelf.
