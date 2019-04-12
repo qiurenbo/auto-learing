@@ -132,6 +132,7 @@ class Browser:
 
         action = ActionChains(self.__driver)
         
+
         # Get video duration
         video_duration_element = self.__driver.find_element_by_class_name("vjs-duration-display")
         action.move_to_element(video_duration_element).perform()
@@ -141,9 +142,12 @@ class Browser:
         logging.info("video duration {} seconds".format(learning_time))
 
         already_learning_time = 0
+
+        # Remove blur\focus listener
+        self.__driver.execute_script('$(window).off(\'blur focus\');')
         while learning_time > 0:
-             # Activate the window
-            self.__driver.switch_to_window(self.__driver.current_window_handle)
+            # Activate the window
+            #self.__driver.switch_to_window(self.__driver.current_window_handle)
             learning_time = learning_time - 1
             already_learning_time = already_learning_time + 1
             time.sleep(1)
