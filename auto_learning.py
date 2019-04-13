@@ -18,3 +18,5 @@ if __name__ == '__main__':
     browser = browser.Browser()
     browser.signin()
     browser.study()
+    browser.quit()
+

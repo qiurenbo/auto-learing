@@ -71,42 +71,45 @@ class Browser:
 
 
     def study(self):
-        # If refresh the browser, we must re-get the dom elements,
-        # So we use the real_unfinished_courses / real_unfinished_learns to cache the real unfinished course/lesson name
-        # Every loop we must re-get the dom elements and use the cache to record what will be choosen net 
-        real_unfinished_courses = self.__get_unfinished_courses()
 
-        for real_unfinished_course in real_unfinished_courses:
+        is_courses_over = False
+        while not is_courses_over:
+            # If refresh the page, we must re-get the dom elements
             unfinished_courses = self.__get_unfinished_courses()
-            unfinished_course = self.__get__real_unfinished_course(real_unfinished_course, unfinished_courses)
-            self.__choose_course(unfinished_course)
             
-            # Cache the unfinished lessons
-            real_unfinished_lessons = self.__get_unfinished_lessons()
-            logging.info(real_unfinished_lessons)
-            for real_unfinished_lesson in real_unfinished_lessons:
-                unfinished_lessons = self.__get_unfinished_lessons()
-                unfinished_lesson = self.__get__real_unfinished_lesson(real_unfinished_lesson, unfinished_lessons)
-                self.__choose_lesson(unfinished_lesson)
-                self.__super_player()
-                self.__driver.execute_script("window.history.go(-1)")
-                time.sleep(3)
+            if unfinished_courses:
+                self.__choose_course(unfinished_courses[0])
+                
+                is_lessons_over = False
+                while not is_lessons_over:
+                    unfinished_lessons = self.__get_unfinished_lessons()
+                    
+                    if unfinished_lessons:
+                        self.__choose_lesson(unfinished_lessons[0])
+                        self.__super_player()
 
-            self.__driver.execute_script("window.history.go(-1)")
-            time.sleep(3)
+                        # If finish the lesson, go back to the lessons list
+                        self.__driver.execute_script("window.history.go(-1)")
+                        self.__driver.refresh()
+                        time.sleep(3)
 
-    def __get__real_unfinished_lesson(self, real_unfinished_lesson, unfinished_lessons):
-        for unfinished_lesson in unfinished_lessons:
-            # Compare the lesson name
-            if real_unfinished_lesson[0] == unfinished_lesson[0]:
-                return unfinished_lesson
+                    # If there are no unfinished lessons,
+                    # go back to courses list
+                    else:
+                        is_lessons_over = True
+                        self.__driver.execute_script("window.history.go(-1)")
+                        self.__driver.refresh()
+                        time.sleep(3)
 
-    def __get__real_unfinished_course(self, real_unfinished_course, unfinished_courses):
-        for unfinished_course in unfinished_courses:
-            # Compare the course name
-            if real_unfinished_course[0] == unfinished_course[0]:
-                return unfinished_course
+            # If there are no unfinished courses,
+            # finsh auto-learning
+            else:
+                is_courses_over = True
 
+    def quit(self):
+        if (self.__driver):
+            self.__driver.quit()
+    
     def __get_unfinished_courses(self):
         courses = self.__find_interesting_table()
         return [course for course in courses if course[-2] == '未完成' ]
@@ -130,13 +133,13 @@ class Browser:
     def __super_player(self):
         logging.info('Wow, play the viedo incrediblely')
 
-        action = ActionChains(self.__driver)
-        
-
         # Get video duration
         video_duration_element = self.__driver.find_element_by_class_name("vjs-duration-display")
-        action.move_to_element(video_duration_element).perform()
-        time.sleep(2)
+        # The duration is on DOM tree when the page loaded, so it is unnecessary to move the mouse.
+        # action = ActionChains(self.__driver)
+        # action.move_to_element(video_duration_element).perform()
+        WebDriverWait(self.__driver, 180, 0.2).until(EC.visibility_of(video_duration_element))
+        
         minutes, seconds = video_duration_element.text.replace('Duration Time','').split(':')
         learning_time = int(minutes) * 60 + int(seconds) + 10
         logging.info("video duration {} seconds".format(learning_time))
@@ -146,8 +149,6 @@ class Browser:
         # Remove blur\focus listener
         self.__driver.execute_script('$(window).off(\'blur focus\');')
         while learning_time > 0:
-            # Activate the window
-            #self.__driver.switch_to_window(self.__driver.current_window_handle)
             learning_time = learning_time - 1
             already_learning_time = already_learning_time + 1
             time.sleep(1)
