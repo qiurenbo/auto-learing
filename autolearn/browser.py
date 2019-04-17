@@ -10,7 +10,7 @@ import os
 import logging
 import time
 
-from autolearn import config_parser, utils
+from autolearn import utils
 
 import requests
 from requests.cookies import RequestsCookieJar
@@ -23,7 +23,8 @@ class Browser:
 
         self.__driver = webdriver
         self.__options = Options()
-        self.__config = config_parser.ConfigParser()
+        self.__tesseract = utils.Tesseract()
+        self.__config = utils.ConfigParser()
 
         self.__login_url = self.__config.get_setting("DangerZone","login_url")
         self.__login_auth_code_url = self.__config.get_setting("DangerZone","login_auth_code_url")
@@ -33,7 +34,8 @@ class Browser:
         self.__password = self.__config.get_setting("Privacy","password")
 
         # Set chrome driver options
-        self.__options.add_argument('--log-level=WARNING')
+        # Forbid console from info printing of webdriver
+        self.__options.add_argument('--log-level=3')
         self.__options.add_argument('--mute-audio')
 
         if self.__config.get_setting("DangerZone","headless") == 'True':
@@ -226,7 +228,7 @@ class Browser:
                 f.flush()
                 os.fsync(f.fileno())
 
-            auth_code = utils.ocr(image_path)
+            auth_code = self.__tesseract.ocr(image_path)
             is_recognized = False if auth_code == '' else True
 
         return auth_code
